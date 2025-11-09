@@ -99,10 +99,10 @@ vim.g.have_nerd_font = false
 --  For more options, you can see `:help option-list`
 
 -- Make line numbers default
-vim.o.number = true
+-- vim.o.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.o.relativenumber = true
+vim.o.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = 'a'
@@ -211,13 +211,13 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- Highlight when yanking (copying) text
 --  Try it with `yap` in normal mode
 --  See `:help vim.hl.on_yank()`
-vim.api.nvim_create_autocmd('TextYankPost', {
-  desc = 'Highlight when yanking (copying) text',
-  group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
-  callback = function()
-    vim.hl.on_yank()
-  end,
-})
+--    vim.api.nvim_create_autocmd('TextYankPost', {
+--      desc = 'Highlight when yanking (copying) text',
+--      group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
+--      callback = function()
+--        vim.hl.on_yank()
+--      end,
+--    })
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
@@ -938,13 +938,141 @@ require('lazy').setup({
       --  Check out: https://github.com/echasnovski/mini.nvim
     end,
   },
+
+  {
+    "mfussenegger/nvim-dap",
+    optional = true,
+    dependencies = {
+      "mfussenegger/nvim-dap-python",
+      -- stylua: ignore
+      keys = {
+        { "<leader>dPt", function() require('dap-python').test_method() end, desc = "Debug Method", ft = "python" },
+        { "<leader>dPc", function() require('dap-python').test_class() end, desc = "Debug Class", ft = "python" },
+      },
+      config = function()
+        require("dap-python").setup("debugpy-adapter")
+      end,
+    },
+  },
+
+  {
+    "rcarriga/nvim-dap-ui", dependencies = {"mfussenegger/nvim-dap", "nvim-neotest/nvim-nio"}
+  },
+
+  {
+    "preservim/tagbar",
+    tagbar_ctags_bin = '/usr/local/bin/ctags'
+  },
+
+  {
+    "linux-cultist/venv-selector.nvim",
+    cmd = "VenvSelect",
+    opts = {
+      options = {
+        notify_user_on_venv_activation = true,
+      },
+    },
+    --  Call config for Python files and load the cached venv automatically
+    ft = "python",
+    keys = { { "<leader>cv", "<cmd>:VenvSelect<cr>", desc = "Select VirtualEnv", ft = "python" } },
+  },
+
+--  {
+--    "sheerun/vim-polyglot",
+--    -- Optional: Lazy load the plugin based on a file type or command
+--    -- This example loads it when a file with a specific filetype is opened
+--    ft = { "javascript", "python", "html" }, -- Load only for these file types
+--    -- or, alternatively, load it on startup with the following commented out:
+--    -- lazy = false, -- Load on startup (default behavior if 'ft' or 'event' is not specified)
+--  },
+  
+  {
+    'stevearc/aerial.nvim',
+       opts = {},
+     -- Optional dependencies^
+      dependencies = {
+         "nvim-treesitter/nvim-treesitter",
+         "nvim-tree/nvim-web-devicons",
+       },
+  },
+
+--  {
+--    "stevearc/aerial.nvim",
+--    event = "LazyFile",
+--    opts = function()
+--      local icons = vim.deepcopy(LazyVim.config.icons.kinds)
+--
+--      -- HACK: fix lua's weird choice for `Package` for control
+--      -- structures like if/else/for/etc.
+--      icons.lua = { Package = icons.Control }
+--
+--      ---@type table<string, string[]>|false
+--      local filter_kind = false
+--      if LazyVim.config.kind_filter then
+--        filter_kind = assert(vim.deepcopy(LazyVim.config.kind_filter))
+--        filter_kind._ = filter_kind.default
+--        filter_kind.default = nil
+--      end
+--
+--      local opts = {
+--        attach_mode = "global",
+--        backends = { "lsp", "treesitter", "markdown", "man" },
+--        show_guides = true,
+--        layout = {
+--          resize_to_content = false,
+--          win_opts = {
+--            winhl = "Normal:NormalFloat,FloatBorder:NormalFloat,SignColumn:SignColumnSB",
+--            signcolumn = "yes",
+--            statuscolumn = " ",
+--          },
+--        },
+--        icons = icons,
+--        filter_kind = filter_kind,
+--        -- stylua: ignore
+--        guides = {
+--          mid_item   = "├╴",
+--          last_item  = "└╴",
+--          nested_top = "│ ",
+--          whitespace = "  ",
+--        },
+--      }
+--      return opts
+--    end,
+--    keys = {
+--      { "<leader>cs", "<cmd>AerialToggle<cr>", desc = "Aerial (Symbols)" },
+--    },
+--  }, 
+--
+    {
+    "hat0uma/csvview.nvim",
+    ---@module "csvview"
+    ---@type CsvView.Options
+    opts = {
+      parser = { comments = { "#", "//" } },
+      keymaps = {
+        -- Text objects for selecting fields
+        textobject_field_inner = { "if", mode = { "o", "x" } },
+        textobject_field_outer = { "af", mode = { "o", "x" } },
+        -- Excel-like navigation:
+        -- Use <Tab> and <S-Tab> to move horizontally between fields.
+        -- Use <Enter> and <S-Enter> to move vertically between rows and place the cursor at the end of the field.
+        -- Note: In terminals, you may need to enable CSI-u mode to use <S-Tab> and <S-Enter>.
+        jump_next_field_end = { "<Tab>", mode = { "n", "v" } },
+        jump_prev_field_end = { "<S-Tab>", mode = { "n", "v" } },
+        jump_next_row = { "<Enter>", mode = { "n", "v" } },
+        jump_prev_row = { "<S-Enter>", mode = { "n", "v" } },
+      },
+    },
+    cmd = { "CsvViewEnable", "CsvViewDisable", "CsvViewToggle" },
+  }, 
+
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'python', 'query', 'sql', 'vim', 'vimdoc' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
