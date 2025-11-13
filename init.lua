@@ -111,7 +111,7 @@ vim.o.mouse = 'a'
 vim.o.showmode = false
 
 -- Sync clipboard between OS and Neovim.
---  Schedule the setting after `UiEnter` because it can increase startup-time.
+--  Schedhttps://github.com/sungicho/sungi-nvim.gitule the setting after `UiEnter` because it can increase startup-time.
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
 vim.schedule(function()
@@ -151,7 +151,7 @@ vim.o.splitbelow = true
 --   and `:help lua-options-guide`
 vim.o.list = true
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
-
+vim.opt.signcolumn = "yes:2"
 -- Preview substitutions live, as you type!
 vim.o.inccommand = 'split'
 
@@ -673,7 +673,10 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         -- gopls = {},
-        -- pyright = {},
+         ruff = {},
+        --   pylint = {},
+          pyright = {}, 
+        --
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -769,6 +772,8 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
+        -- Conform will run multiple formatters sequentially
+        -- python = { "isort", "black" },
         -- python = { "isort", "black" },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
@@ -799,12 +804,12 @@ require('lazy').setup({
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
-          -- {
-          --   'rafamadriz/friendly-snippets',
-          --   config = function()
-          --     require('luasnip.loaders.from_vscode').lazy_load()
-          --   end,
-          -- },
+           {
+             'rafamadriz/friendly-snippets',
+             config = function()
+               require('luasnip.loaders.from_vscode').lazy_load()
+             end,
+           },
         },
         opts = {},
       },
@@ -845,6 +850,12 @@ require('lazy').setup({
         -- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
         -- Adjusts spacing to ensure icons are aligned
         nerd_font_variant = 'mono',
+      },
+
+      list = {
+          selection = function(ctx)
+              return ctx.mode == "cmdline" and "auto_insert" or "preselect"
+          end,
       },
 
       completion = {
@@ -899,7 +910,7 @@ require('lazy').setup({
   },
 
   -- Highlight todo, notes, etc in comments
-  { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+  { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = {  } },
 
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
@@ -939,43 +950,43 @@ require('lazy').setup({
     end,
   },
 
-  {
-    "mfussenegger/nvim-dap",
-    optional = true,
-    dependencies = {
-      "mfussenegger/nvim-dap-python",
-      -- stylua: ignore
-      keys = {
-        { "<leader>dPt", function() require('dap-python').test_method() end, desc = "Debug Method", ft = "python" },
-        { "<leader>dPc", function() require('dap-python').test_class() end, desc = "Debug Class", ft = "python" },
-      },
-      config = function()
-        require("dap-python").setup("debugpy-adapter")
-      end,
-    },
-  },
+--  {
+--    "mfussenegger/nvim-dap",
+--    optional = true,
+--    dependencies = {
+--      "mfussenegger/nvim-dap-python",
+--      -- stylua: ignore
+--      keys = {
+--        { "<leader>dPt", function() require('dap-python').test_method() end, desc = "Debug Method", ft = "python" },
+--        { "<leader>dPc", function() require('dap-python').test_class() end, desc = "Debug Class", ft = "python" },
+--      },
+--      config = function()
+--        require("dap-python").setup("debugpy-adapter")
+--      end,
+--    },
+--  },
 
-  {
-    "rcarriga/nvim-dap-ui", dependencies = {"mfussenegger/nvim-dap", "nvim-neotest/nvim-nio"}
-  },
+--  {
+--    "rcarriga/nvim-dap-ui", dependencies = {"mfussenegger/nvim-dap", "nvim-neotest/nvim-nio"}
+--  },
 
   {
     "preservim/tagbar",
     tagbar_ctags_bin = '/usr/local/bin/ctags'
   },
 
-  {
-    "linux-cultist/venv-selector.nvim",
-    cmd = "VenvSelect",
-    opts = {
-      options = {
-        notify_user_on_venv_activation = true,
-      },
-    },
-    --  Call config for Python files and load the cached venv automatically
-    ft = "python",
-    keys = { { "<leader>cv", "<cmd>:VenvSelect<cr>", desc = "Select VirtualEnv", ft = "python" } },
-  },
+--  {
+--    "linux-cultist/venv-selector.nvim",
+--    cmd = "VenvSelect",
+--    opts = {
+--      options = {
+--        notify_user_on_venv_activation = true,
+--      },
+--    },
+--    --  Call config for Python files and load the cached venv automatically
+--    ft = "python",
+--    keys = { { "<leader>cv", "<cmd>:VenvSelect<cr>", desc = "Select VirtualEnv", ft = "python" } },
+--  },
 
 --  {
 --    "sheerun/vim-polyglot",
@@ -995,6 +1006,17 @@ require('lazy').setup({
          "nvim-tree/nvim-web-devicons",
        },
   },
+
+ {
+    "mfussenegger/nvim-lint",
+    event = "BufReadPost", -- Lazy load when a buffer is read
+    config = function()
+      require("lint").linters_by_ft = {
+        python = { "Ruff" }, -- Use Ruff for Python files
+      }
+    end,
+  }, 
+
 
 --  {
 --    "stevearc/aerial.nvim",
@@ -1066,6 +1088,38 @@ require('lazy').setup({
     cmd = { "CsvViewEnable", "CsvViewDisable", "CsvViewToggle" },
   }, 
 
+--  {
+--    "kshenoy/vim-signature", 
+--    event = 'VimEnter'
+--  }, 
+  {
+    "chentoast/marks.nvim",
+    event = "VeryLazy",
+    opts = {
+      mappings = {
+        set_next = "m,",
+        set_bookmark1 = "m1",
+        set_bookmark2 = "m2",
+        next = "m]",
+        preview = "m:",
+        set_bookmark0 = "m0",
+        prev = false -- pass false to disable only this default mapping
+      }
+    },
+  },
+
+  {
+    "nvim-tree/nvim-tree.lua",
+    version = "*",
+    lazy = false,
+    dependencies = {
+      "nvim-tree/nvim-web-devicons",
+    },
+    config = function()
+      require("nvim-tree").setup {}
+    end,
+  },
+
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
@@ -1103,9 +1157,12 @@ require('lazy').setup({
   --
   -- require 'kickstart.plugins.debug',
   -- require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
+  --  require 'kickstart.plugins.lint',
+    -- require 'kickstart.plugins.autopairs',
+    -- 
+--  require('lint').linters.pylint.cmd = 'python'
+--  require('lint').linters.pylint.args = {'-m', 'pylint', '-f', 'json'}p
+--   require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
