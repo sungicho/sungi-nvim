@@ -673,7 +673,7 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         -- gopls = {},
-        -- pyright = {},
+        ruff = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -769,7 +769,7 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
+        python = { 'isort', 'black' },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
@@ -938,13 +938,83 @@ require('lazy').setup({
       --  Check out: https://github.com/echasnovski/mini.nvim
     end,
   },
+
+  {
+    'stevearc/aerial.nvim',
+    opts = {},
+    -- Optional dependencies
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+      'nvim-tree/nvim-web-devicons',
+    },
+  },
+
+  {
+    'mfussengegger/nvim-lint',
+    event = 'BufReadPost',
+    config = function()
+      require('lint').linters_by_ft = {
+        python = { 'Ruff' },
+      }
+    end,
+  },
+
+  {
+    'hat0uma/csvview.nvim',
+    ---@module "csvview"
+    ---@type CsvView.Options
+    opts = {
+      parser = { comments = { '#', '//' } },
+      keymaps = {
+        -- Text objects for selecting fields
+        textobject_field_inner = { 'if', mode = { 'o', 'x' } },
+        textobject_field_outer = { 'af', mode = { 'o', 'x' } },
+        -- Excel-like navigation:
+        -- Use <Tab> and <S-Tab> to move horizontally between fields.
+        -- Use <Enter> and <S-Enter> to move vertically between rows and place the cursor at the end of the field.
+        -- Note: In terminals, you may need to enable CSI-u mode to use <S-Tab> and <S-Enter>.
+        jump_next_field_end = { '<Tab>', mode = { 'n', 'v' } },
+        jump_prev_field_end = { '<S-Tab>', mode = { 'n', 'v' } },
+        jump_next_row = { '<Enter>', mode = { 'n', 'v' } },
+        jump_prev_row = { '<S-Enter>', mode = { 'n', 'v' } },
+      },
+    },
+    cmd = { 'CsvViewEnable', 'CsvViewDisable', 'CsvViewToggle' },
+  },
+
+  {
+    'chentoast/marks.nvim',
+    event = 'VeryLazy',
+    opts = {
+      force_write_shada = false,
+      mappings = {
+        set_next = 'm,',
+        next = 'm]',
+        preview = 'm:',
+        prev = false,
+      },
+    },
+  },
+
+  {
+    'nvim-tree/nvim-tree.lua',
+    version = '*',
+    lazy = false,
+    dependencies = {
+      'nvim-tree/nvim-web-devicons',
+    },
+    config = function()
+      require('nvim-tree').setup {}
+    end,
+  },
+
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'python', 'query', 'vim', 'vimdoc' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -975,7 +1045,7 @@ require('lazy').setup({
   --
   -- require 'kickstart.plugins.debug',
   -- require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
+  require 'kickstart.plugins.lint',
   -- require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
